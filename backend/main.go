@@ -61,19 +61,35 @@ func main() {
 	healthController := controllers.NewHealthController(version)
 	batchController := controllers.NewBatchController(batchService)
 	chunkController := controllers.NewChunkController(chunkService)
+	fileController := controllers.NewFileController(objectStorage)
 
-	// Configure CORS - only allow your frontend domain in production
+	// Configure CORS - allow frontend origin for private API
 	corsConfig := cors.DefaultConfig()
 	corsConfig.AllowOrigins = []string{cfg.CorsOrigin}
 	corsConfig.AllowMethods = []string{"GET", "POST", "PUT", "HEAD", "DELETE", "OPTIONS"}
 	corsConfig.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "X-Upload-Batch-Id", "Tus-Resumable"}
 	r.Use(cors.New(corsConfig))
 	
+	// Create a separate middleware for the public API
+	publicCorsConfig := cors.DefaultConfig()
+	publicCorsConfig.AllowAllOrigins = true
+	publicCorsConfig.AllowMethods = []string{"GET", "POST", "PUT", "HEAD", "DELETE", "OPTIONS"}
+	publicCorsConfig.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type"}
+	
+	// Apply the public CORS middleware to /api/file paths
+	r.Use(func(c *gin.Context) {
+		path := c.Request.URL.Path
+		if len(path) >= 9 && path[:9] == "/api/file" {
+			cors.New(publicCorsConfig)(c)
+		}
+		c.Next()
+	})
+	
 	// Configure router for handling large files
-	r.MaxMultipartMemory = 100 << 20 // 100 MiB (increased from default 8 MiB)
+	r.MaxMultipartMemory = 100 << 20
 	
 	// Register all API routes
-	router.RegisterRoutes(r, healthController, batchController, chunkController)
+	router.RegisterRoutes(r, healthController, batchController, chunkController, fileController)
 
 	// Static file serving for frontend
 	r.NoRoute(func(c *gin.Context) {

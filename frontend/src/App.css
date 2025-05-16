@@ -1395,3 +1395,65 @@ footer {
     margin-top: 8px;
   }
 }
+
+.api-modal {
+  max-width: 700px;
+}
+
+.endpoint {
+  display: flex;
+  align-items: center;
+  margin: 0.75rem 0;
+  gap: 0.75rem;
+}
+
+.method {
+  font-size: 0.8rem;
+  font-weight: bold;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.method.get {
+  background-color: #2196F3;
+  color: white;
+}
+
+.method.post {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.method.delete {
+  background-color: #F44336;
+  color: white;
+}
+
+.url {
+  font-family: monospace;
+  font-size: 1rem;
+  padding: 0.25rem;
+  background-color: var(--background);
+  border-radius: 4px;
+}
+
+.api-note {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-left: 4px solid var(--accent);
+  border-radius: 4px;
+}
+
+.api-docs-link {
+  color: var(--text-secondary);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  transition: all 0.2s ease;
+}
+
+.api-docs-link:hover {
+  color: var(--primary);
+}

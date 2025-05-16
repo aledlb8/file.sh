@@ -2,12 +2,20 @@ import React, { useState, useEffect } from 'react';
 
 const Footer: React.FC = () => {
   const [showModal, setShowModal] = useState<boolean>(false);
+  const [showApiModal, setShowApiModal] = useState<boolean>(false);
   const [isClosing, setIsClosing] = useState<boolean>(false);
+  const [isApiClosing, setIsApiClosing] = useState<boolean>(false);
 
   const openModal = (e: React.MouseEvent) => {
     e.preventDefault();
     setIsClosing(false);
     setShowModal(true);
+  };
+
+  const openApiModal = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsApiClosing(false);
+    setShowApiModal(true);
   };
 
   const closeModal = () => {
@@ -19,17 +27,27 @@ const Footer: React.FC = () => {
     }, 300); // Match animation duration
   };
 
-  // Close modal on escape key
+  const closeApiModal = () => {
+    setIsApiClosing(true);
+    // Delay actual closing to allow animation to complete
+    setTimeout(() => {
+      setShowApiModal(false);
+      setIsApiClosing(false);
+    }, 300); // Match animation duration
+  };
+
+  // Close modals on escape key
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && showModal) {
-        closeModal();
+      if (e.key === 'Escape') {
+        if (showModal) closeModal();
+        if (showApiModal) closeApiModal();
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [showModal]);
+  }, [showModal, showApiModal]);
 
   return (
     <>
@@ -46,6 +64,10 @@ const Footer: React.FC = () => {
           <span className="footer-separator">•</span>
           <a href="#" className="self-host-link" onClick={openModal}>
             Self-Host
+          </a>
+          <span className="footer-separator">•</span>
+          <a href="#" className="api-docs-link" onClick={openApiModal}>
+            API
           </a>
         </div>
 
@@ -102,6 +124,73 @@ const Footer: React.FC = () => {
             <div className="modal-footer">
               <button className="button" onClick={closeModal}>Close</button>
               <a href="https://github.com/aledlb8/file.sh" target="_blank" rel="noopener noreferrer" className="button">View on GitHub</a>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showApiModal && (
+        <div className={`modal-overlay ${isApiClosing ? 'closing' : ''}`} onClick={closeApiModal}>
+          <div className={`modal-content api-modal ${isApiClosing ? 'closing' : ''}`} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>File.sh Public API</h3>
+              <button className="modal-close" onClick={closeApiModal}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M18 6L6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+            </div>
+            <div className="modal-body">
+              <p>
+                File.sh provides a simple public API for direct file uploads and downloads.
+                The API is rate-limited to 5 requests per minute per IP address and has a 100MB file size limit.
+              </p>
+
+              <h4>Upload a File</h4>
+              <div className="endpoint">
+                <span className="method post">POST</span>
+                <span className="url">/api/file</span>
+              </div>
+              <p>Upload a file using a multipart form request.</p>
+              <div className="code-block">
+                <code>
+                  # Using curl<br/>
+                  curl -X POST -F "file=@/path/to/file.txt" https://file.sh/api/file
+                </code>
+              </div>
+              <p>Response:</p>
+              <div className="code-block">
+                <code>
+                  &#123;<br/>
+                  &nbsp;&nbsp;"fileId": "550e8400-e29b-41d4-a716-446655440000",<br/>
+                  &nbsp;&nbsp;"filename": "example.txt",<br/>
+                  &nbsp;&nbsp;"size": 1234,<br/>
+                  &nbsp;&nbsp;"downloadPath": "/api/file/550e8400-e29b-41d4-a716-446655440000"<br/>
+                  &#125;
+                </code>
+              </div>
+
+              <h4>Download a File</h4>
+              <div className="endpoint">
+                <span className="method get">GET</span>
+                <span className="url">/api/file/:fileId</span>
+              </div>
+              <p>Download a file by its ID.</p>
+              <div className="code-block">
+                <code>
+                  # Using curl<br/>
+                  curl -O -J https://file.sh/api/file/550e8400-e29b-41d4-a716-446655440000
+                </code>
+              </div>
+
+              <div className="api-note">
+                <strong>Note:</strong> This API is public and can be accessed from any origin. Files uploaded through the API
+                are stored in the same storage backend as files uploaded through the web interface.
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button className="button" onClick={closeApiModal}>Close</button>
             </div>
           </div>
         </div>
