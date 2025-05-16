@@ -1,0 +1,12 @@
+{
+  "name": "File.sh",
+  "short_name": "File.sh",
+  "description": "End-to-end encrypted, anonymous file transfers with zero tracking.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#121212",
+  "theme_color": "#121212",
+  "categories": ["productivity", "utilities", "security"],
+  "lang": "en-US",
+  "dir": "ltr"
+}

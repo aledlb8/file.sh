@@ -1,0 +1,13 @@
+# Allow all search engine robots to access the entire site
+User-agent: *
+Allow: /
+
+# Sitemap location - uncomment when sitemap is deployed
+# Sitemap: https://file.sh/sitemap.xml
+
+# Crawl-delay directive
+Crawl-delay: 10
+
+# Disallow specific directories that shouldn't be indexed
+Disallow: /api/
+Disallow: /admin/
