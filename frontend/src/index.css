@@ -1,0 +1,85 @@
+:root {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+    Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: dark;
+  color: #FFFFFF;
+  background-color: #121212;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  font-weight: 500;
+  color: #5deaef;
+  text-decoration: inherit;
+  transition: color 0.2s;
+}
+a:hover {
+  color: #7879F1;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+h1 {
+  font-size: 2.5rem;
+  line-height: 1.1;
+}
+
+button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #2A2A2A;
+  cursor: pointer;
+  transition: all 0.25s;
+}
+button:hover {
+  border-color: #5D5FEF;
+}
+button:focus,
+button:focus-visible {
+  outline: 2px solid rgba(93, 95, 239, 0.25);
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #FFFFFF;
+    background-color: #121212;
+  }
+  a:hover {
+    color: #7879F1;
+  }
+  button {
+    background-color: #2A2A2A;
+  }
+}
