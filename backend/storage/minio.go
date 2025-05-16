@@ -88,13 +88,53 @@ func NewMinioStorage(cfg config.MinioConfig) (ObjectStorage, error) {
 
 // UploadObject uploads a file to MinIO
 func (s *MinioStorage) UploadObject(ctx context.Context, objectName string, reader io.Reader, objectSize int64) error {
-	_, err := s.client.PutObject(ctx, s.bucketName, objectName, reader, objectSize, minio.PutObjectOptions{
-		ContentType: "application/octet-stream",
-	})
-	if err != nil {
-		return fmt.Errorf("failed to upload object: %w", err)
+	// Add logging for troubleshooting
+	log.Printf("Starting upload of object %s with expected size: %d bytes", objectName, objectSize)
+
+	// Upload with retries for large files
+	var err error
+	maxRetries := 3
+	retryDelay := 2 * time.Second
+
+	for attempt := 0; attempt <= maxRetries; attempt++ {
+		if attempt > 0 {
+			log.Printf("Retry #%d for object %s after waiting %v", attempt, objectName, retryDelay)
+			time.Sleep(retryDelay)
+			retryDelay *= 2 // Exponential backoff
+		}
+
+		option := minio.PutObjectOptions{
+			ContentType: "application/octet-stream",
+			// Specifying part size to ensure proper handling of large files
+			PartSize: 64 * 1024 * 1024, // 64MB parts for multipart upload
+		}
+
+		info, err := s.client.PutObject(ctx, s.bucketName, objectName, reader, objectSize, option)
+		if err == nil {
+			log.Printf("Successfully uploaded object %s: ETag=%s, Size=%d", objectName, info.ETag, info.Size)
+			return nil
+		}
+
+		log.Printf("Error on attempt #%d uploading object %s: %v", attempt+1, objectName, err)
+		
+		// If this was our last attempt, break and return the error
+		if attempt == maxRetries {
+			break
+		}
+
+		// If retry, reset the reader for the next attempt
+		if seekable, ok := reader.(io.Seeker); ok {
+			if _, err := seekable.Seek(0, io.SeekStart); err != nil {
+				log.Printf("Failed to reset reader position: %v", err)
+				break // Can't retry if we can't reset the reader
+			}
+		} else {
+			log.Printf("Reader is not seekable, cannot retry")
+			break
+		}
 	}
-	return nil
+
+	return fmt.Errorf("failed to upload object after %d attempts: %w", maxRetries+1, err)
 }
 
 // DownloadObject downloads a file from MinIO

@@ -35,7 +35,7 @@ const Footer: React.FC = () => {
     <>
       <footer>
         <p>File.sh - End-to-end encrypted, anonymous file transfers</p>
-        
+
         <div className="footer-links">
           <a href="https://github.com/aledlb8/file.sh" target="_blank" rel="noopener noreferrer" className="github-link">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -48,7 +48,7 @@ const Footer: React.FC = () => {
             Self-Host
           </a>
         </div>
-        
+
         <p>
           <small>
             No logs. No tracking. All encryption and decryption happens in your browser.
@@ -63,14 +63,14 @@ const Footer: React.FC = () => {
               <h3>Self-Host File.sh</h3>
               <button className="modal-close" onClick={closeModal}>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M18 6L6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M18 6L6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </button>
             </div>
             <div className="modal-body">
               <p>File.sh is an open-source project that you can host on your own server for complete control over your data.</p>
-              
+
               <h4>Benefits of Self-Hosting</h4>
               <ul>
                 <li>Complete control over your file transfers</li>
@@ -78,25 +78,25 @@ const Footer: React.FC = () => {
                 <li>Custom domain and branding options</li>
                 <li>Enhanced privacy for your organization</li>
               </ul>
-              
+
               <h4>Requirements</h4>
               <ul>
                 <li>A server with Docker installed</li>
                 <li>Basic command line knowledge</li>
               </ul>
-              
+
               <h4>Quick Setup</h4>
               <div className="code-block">
                 <code>
-                  git clone https://github.com/aledlb8/file.sh<br/>
-                  cd file.sh<br/>
-                  # On Windows:<br/>
-                  ./start.ps1<br/>
-                  # On Linux/Mac:<br/>
+                  git clone https://github.com/aledlb8/file.sh<br />
+                  cd file.sh<br />
+                  # On Windows:<br />
+                  ./start.ps1<br />
+                  # On Linux/Mac:<br />
                   ./start.sh
                 </code>
               </div>
-              
+
               <p>For detailed setup instructions, deployment options, and configuration details, visit the <a href="https://github.com/aledlb8/file.sh" target="_blank" rel="noopener noreferrer">GitHub repository</a>.</p>
             </div>
             <div className="modal-footer">
@@ -110,4 +110,4 @@ const Footer: React.FC = () => {
   );
 };
 
-export default Footer; 
+export default Footer;

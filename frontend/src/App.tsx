@@ -11,10 +11,10 @@ function App() {
   // Handle tab transitions
   const handleViewChange = (newView: 'upload' | 'download') => {
     if (newView === view) return
-    
+
     setIsTransitioning(true)
     setView(newView)
-    
+
     // After animation completes, update the current view
     setTimeout(() => {
       setIsTransitioning(false)
@@ -37,16 +37,16 @@ function App() {
       <header>
         <h1>File.sh</h1>
         <p>End-to-end encrypted, anonymous file transfers</p>
-        
+
         <nav>
-          <button 
-            className={view === 'upload' ? 'active' : ''} 
+          <button
+            className={view === 'upload' ? 'active' : ''}
             onClick={() => handleViewChange('upload')}
           >
             Upload
           </button>
-          <button 
-            className={view === 'download' ? 'active' : ''} 
+          <button
+            className={view === 'download' ? 'active' : ''}
             onClick={() => handleViewChange('download')}
           >
             Download

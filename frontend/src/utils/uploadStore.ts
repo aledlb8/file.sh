@@ -1,6 +1,30 @@
 import { openDB } from 'idb';
 import type { DBSchema, IDBPDatabase } from 'idb';
 
+/**
+ * Fixed chunk handling for large file uploads
+ * Ensures that files are properly divided into the intended chunk size
+ */
+export const prepareFileChunks = (file: Blob, chunkSize: number = 5 * 1024 * 1024): Blob[] => {
+  const chunks: Blob[] = [];
+  const totalChunks = Math.ceil(file.size / chunkSize);
+  console.log(`Preparing ${totalChunks} chunks of ${chunkSize} bytes for file of size ${file.size} bytes`);
+  
+  for (let i = 0; i < totalChunks; i++) {
+    const start = i * chunkSize;
+    const end = Math.min(file.size, start + chunkSize);
+    const chunk = file.slice(start, end);
+    chunks.push(chunk);
+    
+    if (i === 0 || i === totalChunks - 1 || i % 10 === 0) {
+      console.log(`Prepared chunk ${i+1}/${totalChunks}, size: ${chunk.size} bytes`);
+    }
+  }
+  
+  console.log(`Total chunks prepared: ${chunks.length}`);
+  return chunks;
+}
+
 // Define database schema
 interface UploadDB extends DBSchema {
   'upload-state': {
@@ -143,6 +167,13 @@ class UploadStore {
     return db.get('chunk-state', key);
   }
 
+  // Get all chunks for a specific file
+  async getChunkStates(batchId: string, fileId: string): Promise<ChunkState[]> {
+    const db = await this.db;
+    const allChunks = await db.getAll('chunk-state');
+    return allChunks.filter(chunk => chunk.batchId === batchId && chunk.fileId === fileId);
+  }
+
   // Get all chunks for a batch
   async getAllChunks(batchId: string): Promise<ChunkState[]> {
     const db = await this.db;
@@ -161,6 +192,24 @@ class UploadStore {
     return allUploads.filter(
       upload => upload.status !== 'completed' && upload.status !== 'error'
     );
+  }
+
+  // Add a chunk to the uploaded list
+  async addUploadedChunk(batchId: string, chunkIndex: number): Promise<void> {
+    const state = await this.getUploadState(batchId);
+    if (!state) return;
+
+    // Mark the chunk as uploaded
+    const chunkStates = await this.getAllChunks(batchId);
+    const matchingChunk = chunkStates.find(c => c.chunkIndex === chunkIndex);
+
+    if (matchingChunk) {
+      await this.saveChunkState({
+        ...matchingChunk,
+        uploaded: true,
+        status: 'completed'
+      });
+    }
   }
 
   // Clean up old uploads (older than 7 days)
