@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![File.sh Logo](frontend/public/logo.svg)
+<!-- ![File.sh Logo](frontend/public/logo.svg) -->
 
 **Privacy-First Secure File Transfer Platform**
 
@@ -73,7 +73,7 @@ File.sh implements a modern, scalable architecture:
 ```
 ┌─────────────────┐     ┌───────────────────┐     ┌──────────────────────┐
 │                 │     │                   │     │                      │
-│  Browser Client │────▶│  Go/Gin REST API  │────▶│  Object Storage      │
+│  Browser Client │───▶│  Go/Gin REST API  │────▶│  Object Storage      │
 │  (React + Vite) │     │  (Stateless)      │     │  (MinIO/S3)          │
 │                 │     │                   │     │                      │
 └─────────────────┘     └───────────────────┘     └──────────────────────┘
@@ -141,7 +141,7 @@ To quickly set up all components and generate configuration files:
 
 3. Access the application:
    - Frontend: http://localhost:5173
-   - MinIO Console: http://localhost:9001 (user: minioadmin, password: minioadmin)
+   - MinIO Console: http://localhost:9001
 
 4. To stop all services:
    **Windows**
