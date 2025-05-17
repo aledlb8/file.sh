@@ -14,6 +14,8 @@
 
 </div>
 
+![Showcase Video](https://github.com/user-attachments/assets/f99bb526-fa49-4890-94e9-a83c0a8fa71c)
+
 ## Overview
 
 File.sh is a privacy-first file transfer solution that provides end-to-end encryption with zero server-side knowledge of file contents. Designed for privacy-conscious users, File.sh offers a clean and efficient architecture that can be self-hosted or deployed in cloud environments.
