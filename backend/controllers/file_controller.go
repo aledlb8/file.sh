@@ -1,12 +1,12 @@
 package controllers
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"path/filepath"
-	"time"
 
 	"filesh/services/storage"
 	"filesh/utils"
@@ -59,19 +59,11 @@ func (c *FileController) UploadFile(ctx *gin.Context) {
 	originalFilename := header.Filename
 	extension := filepath.Ext(originalFilename)
 	
-	// Create metadata
-	metadata := map[string]string{
-		"original-filename": originalFilename,
-		"content-type":      header.Header.Get("Content-Type"),
-		"upload-date":       time.Now().Format(time.RFC3339),
-		"file-size":         fmt.Sprintf("%d", header.Size),
-	}
-	
 	// Object path in storage
 	objectPath := fmt.Sprintf("files/%s%s", fileID, extension)
 	
 	// Upload file to storage
-	_, err = c.storage.PutObject(objectPath, file, header.Size, metadata)
+	err = c.storage.UploadObject(context.Background(), objectPath, file, header.Size)
 	if err != nil {
 		c.logger.Printf("Error uploading file to storage: %v", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to store file"})
@@ -97,7 +89,7 @@ func (c *FileController) DownloadFile(ctx *gin.Context) {
 	
 	// Find the file in storage
 	// First we need to get the file extension by listing objects with this prefix
-	objectsInfo, err := c.storage.ListObjects("files/" + fileID)
+	objectsInfo, err := c.storage.ListObjects(context.Background(), "files/" + fileID)
 	if err != nil || len(objectsInfo) == 0 {
 		c.logger.Printf("Error finding file %s: %v", fileID, err)
 		ctx.JSON(http.StatusNotFound, gin.H{"error": "File not found"})
@@ -105,29 +97,29 @@ func (c *FileController) DownloadFile(ctx *gin.Context) {
 	}
 	
 	// Get the first matching object
-	objectPath := objectsInfo[0].Key
+	objectPath := objectsInfo[0].Name
 	
 	// Get file from storage
-	objectInfo, reader, err := c.storage.GetObject(objectPath)
+	objectInfo, err := c.storage.GetObjectInfo(context.Background(), objectPath)
 	if err != nil {
-		c.logger.Printf("Error retrieving file %s: %v", objectPath, err)
+		c.logger.Printf("Error getting object info %s: %v", objectPath, err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve file info"})
+		return
+	}
+	
+	reader, err := c.storage.DownloadObject(context.Background(), objectPath)
+	if err != nil {
+		c.logger.Printf("Error downloading file %s: %v", objectPath, err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve file"})
 		return
 	}
 	defer reader.Close()
 	
-	// Get original filename from metadata
-	originalFilename := objectInfo.Metadata["original-filename"]
-	if originalFilename == "" {
-		// Fallback to fileID + extension if metadata is missing
-		originalFilename = filepath.Base(objectPath)
-	}
+	// Fallback to fileID + extension if metadata is missing
+	originalFilename := filepath.Base(objectPath)
 	
-	// Set content type header
-	contentType := objectInfo.Metadata["content-type"]
-	if contentType == "" {
-		contentType = "application/octet-stream"
-	}
+	// Default content type
+	contentType := "application/octet-stream"
 	
 	// Set appropriate headers for download
 	ctx.Header("Content-Description", "File Transfer")
