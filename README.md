@@ -14,7 +14,7 @@
 
 </div>
 
-![Showcase Video](https://github.com/user-attachments/assets/f99bb526-fa49-4890-94e9-a83c0a8fa71c)
+https://github.com/user-attachments/assets/f99bb526-fa49-4890-94e9-a83c0a8fa71c
 
 ## Overview
 
