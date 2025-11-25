@@ -6,7 +6,9 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
 	"path/filepath"
+	"strconv"
 
 	"filesh/services/storage"
 	"filesh/utils"
@@ -15,8 +17,8 @@ import (
 	"github.com/google/uuid"
 )
 
-// Maximum file size (100MB)
-const maxFileSize = 100 * 1024 * 1024
+// Maximum file size (10GB - configurable via environment)
+var maxFileSize = getMaxFileSize()
 
 // FileController handles direct file uploads and downloads
 type FileController struct {
@@ -130,4 +132,19 @@ func (c *FileController) DownloadFile(ctx *gin.Context) {
 	// Stream file to response
 	ctx.Status(http.StatusOK)
 	io.Copy(ctx.Writer, reader)
+}
+
+// getMaxFileSize returns the maximum file size from environment or default (10GB)
+func getMaxFileSize() int64 {
+	envSize := os.Getenv("MAX_FILE_SIZE_MB")
+	if envSize == "" {
+		return 10 * 1024 * 1024 * 1024 // 10GB default
+	}
+
+	sizeMB, err := strconv.ParseInt(envSize, 10, 64)
+	if err != nil {
+		return 10 * 1024 * 1024 * 1024 // 10GB default on error
+	}
+
+	return sizeMB * 1024 * 1024 // Convert MB to bytes
 }

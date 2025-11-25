@@ -5,7 +5,7 @@ import type { DBSchema, IDBPDatabase } from 'idb';
  * Fixed chunk handling for large file uploads
  * Ensures that files are properly divided into the intended chunk size
  */
-export const prepareFileChunks = (file: Blob, chunkSize: number = 5 * 1024 * 1024): Blob[] => {
+export const prepareFileChunks = (file: Blob, chunkSize: number = 2 * 1024 * 1024): Blob[] => {
   const chunks: Blob[] = [];
   const totalChunks = Math.ceil(file.size / chunkSize);
   console.log(`Preparing ${totalChunks} chunks of ${chunkSize} bytes for file of size ${file.size} bytes`);

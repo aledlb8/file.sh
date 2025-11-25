@@ -2,14 +2,19 @@ package config
 
 import (
 	"os"
+	"strconv"
 	"time"
 )
 
 // Config holds all application configuration
 type Config struct {
-	CorsOrigin string
-	Minio      MinioConfig
-	FileExpiry time.Duration
+	CorsOrigin      string
+	Minio           MinioConfig
+	FileExpiry      time.Duration
+	MaxFileSizeMB   int64
+	RequestTimeout  time.Duration
+	WriteTimeout    time.Duration
+	ReadTimeout     time.Duration
 }
 
 // MinioConfig holds MinIO configuration
@@ -33,7 +38,11 @@ func Load() (*Config, error) {
 			UseSSL:          getEnv("MINIO_USE_SSL", "false") == "true",
 			BucketName:      getEnv("MINIO_BUCKET_NAME", "filesh"),
 		},
-		FileExpiry: getEnvDuration("FILE_EXPIRY", 24*7*time.Hour), // 7 days default
+		FileExpiry:     getEnvDuration("FILE_EXPIRY", 24*7*time.Hour), // 7 days default
+		MaxFileSizeMB:  getEnvInt64("MAX_FILE_SIZE_MB", 10240),        // 10GB default
+		RequestTimeout: getEnvDuration("REQUEST_TIMEOUT", 30*time.Minute), // 30 minutes for large uploads
+		WriteTimeout:   getEnvDuration("WRITE_TIMEOUT", 30*time.Minute),   // 30 minutes for large uploads
+		ReadTimeout:    getEnvDuration("READ_TIMEOUT", 30*time.Minute),    // 30 minutes for large downloads
 	}
 
 	return cfg, nil
@@ -54,11 +63,26 @@ func getEnvDuration(key string, defaultValue time.Duration) time.Duration {
 	if value == "" {
 		return defaultValue
 	}
-	
+
 	duration, err := time.ParseDuration(value)
 	if err != nil {
 		return defaultValue
 	}
-	
+
 	return duration
+}
+
+// Helper function to get int64 from environment variable
+func getEnvInt64(key string, defaultValue int64) int64 {
+	value := os.Getenv(key)
+	if value == "" {
+		return defaultValue
+	}
+
+	intValue, err := strconv.ParseInt(value, 10, 64)
+	if err != nil {
+		return defaultValue
+	}
+
+	return intValue
 } 

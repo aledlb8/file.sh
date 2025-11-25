@@ -1,7 +1,12 @@
 package main
 
 import (
+	"context"
+	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"filesh/config"
 	"filesh/controllers"
@@ -85,9 +90,9 @@ func main() {
 		c.Next()
 	})
 	
-	// Configure router for handling large files
-	r.MaxMultipartMemory = 100 << 20
-	
+	// Configure router for handling large files - reduced memory usage
+	r.MaxMultipartMemory = 32 << 20 // 32MB instead of 100MB
+
 	// Register all API routes
 	router.RegisterRoutes(r, healthController, batchController, chunkController, fileController)
 
@@ -108,10 +113,40 @@ func main() {
 		port = "8080"
 	}
 
+	// Create HTTP server with timeouts for large file handling
+	srv := &http.Server{
+		Addr:         ":" + port,
+		Handler:      r,
+		ReadTimeout:  cfg.ReadTimeout,
+		WriteTimeout: cfg.WriteTimeout,
+		IdleTimeout:  time.Minute,
+	}
+
 	logger.Printf("Starting server on :%s", port)
 	logger.Printf("Frontend CORS origin: %s", cfg.CorsOrigin)
-	
-	if err := r.Run(":" + port); err != nil {
-		logger.Fatalf("Failed to start server: %v", err)
+	logger.Printf("Read timeout: %v, Write timeout: %v", cfg.ReadTimeout, cfg.WriteTimeout)
+
+	// Start server in a goroutine
+	go func() {
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			logger.Fatalf("Failed to start server: %v", err)
+		}
+	}()
+
+	// Wait for interrupt signal to gracefully shutdown the server
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+
+	logger.Printf("Shutting down server...")
+
+	// Graceful shutdown with timeout
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	if err := srv.Shutdown(ctx); err != nil {
+		logger.Fatalf("Server forced to shutdown: %v", err)
 	}
+
+	logger.Printf("Server exited")
 } 

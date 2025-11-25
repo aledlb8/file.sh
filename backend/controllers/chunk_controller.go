@@ -43,8 +43,8 @@ func (c *ChunkController) UploadChunk(ctx *gin.Context) {
 		return
 	}
 
-	// Parse multipart form for the uploaded file
-	maxMemory := int64(100 * 1024 * 1024) // 100MB
+	// Parse multipart form for the uploaded file - reduced memory usage
+	maxMemory := int64(32 * 1024 * 1024) // 32MB - optimized for chunk processing
 	if err := ctx.Request.ParseMultipartForm(maxMemory); err != nil {
 		ctx.JSON(http.StatusBadRequest, models.NewErrorResponse(fmt.Sprintf("Failed to parse form: %v", err)))
 		return
@@ -71,8 +71,8 @@ func (c *ChunkController) UploadChunk(ctx *gin.Context) {
 	}
 	defer src.Close()
 
-	// Create a buffered reader for efficient upload
-	bufReader := bufio.NewReader(src)
+	// Create a buffered reader with limited buffer size for memory efficiency
+	bufReader := bufio.NewReaderSize(src, 64*1024) // 64KB buffer
 
 	// Upload the chunk using chunk service
 	result, err := c.chunkService.UploadChunk(ctx.Request.Context(), batchID, chunkIndex, bufReader, file.Size)
